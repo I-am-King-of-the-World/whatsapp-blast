@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Рассылка</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- АВТОРИЗАЦИЯ -->
+<div id="экран-авторизации" class="экран">
+  <div class="auth-карточка">
+    <div class="лого">
+      <span class="лого-иконка">📨</span>
+      <h1>WhatsApp Рассылка</h1>
+      <p>Массовые сообщения через Notion</p>
+    </div>
+    <div class="auth-табы">
+      <button class="таб активный" onclick="переключитьТаб('вход')">Вход</button>
+      <button class="таб" onclick="переключитьТаб('регистрация')">Регистрация</button>
+    </div>
+    <div id="форма-вход">
+      <input type="email" id="вход-email" placeholder="Email" class="поле">
+      <input type="password" id="вход-пароль" placeholder="Пароль" class="поле">
+      <button class="кнопка-главная" onclick="войти()">Войти</button>
+    </div>
+    <div id="форма-регистрация" style="display:none">
+      <input type="text" id="рег-имя" placeholder="Название компании" class="поле">
+      <input type="email" id="рег-email" placeholder="Email" class="поле">
+      <input type="password" id="рег-пароль" placeholder="Пароль" class="поле">
+      <button class="кнопка-главная" onclick="зарегистрироваться()">Создать аккаунт</button>
+    </div>
+    <p id="auth-ошибка" class="ошибка"></p>
+  </div>
+</div>
+
+<!-- ГЛАВНОЕ ПРИЛОЖЕНИЕ -->
+<div id="экран-приложения" class="экран" style="display:none">
+
+  <!-- ШАПКА -->
+  <header>
+    <div class="шапка-лево">
+      <span class="лого-иконка">📨</span>
+      <span id="имя-пользователя"></span>
+    </div>
+    <nav>
+      <button class="нав-кнопка активный" onclick="показатьВкладку('клиенты')">👥 Клиенты</button>
+      <button class="нав-кнопка" onclick="показатьВкладку('рассылка')">📤 Рассылка</button>
+      <button class="нав-кнопка" onclick="показатьВкладку('настройки')">⚙️ Настройки</button>
+    </nav>
+    <div class="шапка-право">
+      <div id="wa-статус-бейдж" class="бейдж серый">● Не подключён</div>
+      <button class="кнопка-выйти" onclick="выйти()">Выйти</button>
+    </div>
+  </header>
+
+  <!-- ВКЛАДКА: КЛИЕНТЫ -->
+  <div id="вкладка-клиенты" class="вкладка">
+    <div class="панель-управления">
+      <div class="панель-лево">
+        <h2>База клиентов</h2>
+        <span id="счётчик-строк" class="счётчик">0 записей</span>
+      </div>
+      <div class="панель-право">
+        <button class="кнопка-вторичная" onclick="добавитьФильтр()">+ Фильтр</button>
+        <button class="кнопка-вторичная" onclick="сбросить()">Сбросить</button>
+        <button class="кнопка-главная" onclick="загрузитьКлиентов()">🔄 Обновить</button>
+      </div>
+    </div>
+
+    <!-- ФИЛЬТРЫ -->
+    <div id="зона-фильтров" class="зона-фильтров"></div>
+
+    <!-- КНОПКА ВЫБОРА -->
+    <div class="выбор-панель">
+      <label class="чекбокс-лейбл">
+        <input type="checkbox" id="выбрать-всех" onchange="выбратьВсех(this.checked)">
+        Выбрать всех
+      </label>
+      <span id="счётчик-выбранных" class="счётчик">0 выбрано</span>
+      <button class="кнопка-зелёная" onclick="перейтиКРассылке()" id="кнопка-разослать" disabled>
+        📤 Разослать выбранным
+      </button>
+    </div>
+
+    <!-- ТАБЛИЦА -->
+    <div class="таблица-обёртка">
+      <div id="загрузка-таблицы" class="загрузка-текст">Загрузка...</div>
+      <table id="таблица-клиентов" style="display:none">
+        <thead id="заголовки-таблицы"></thead>
+        <tbody id="тело-таблицы"></tbody>
+      </table>
+      <div id="нет-данных" style="display:none" class="загрузка-текст">Ничего не найдено</div>
+    </div>
+  </div>
+
+  <!-- ВКЛАДКА: РАССЫЛКА -->
+  <div id="вкладка-рассылка" class="вкладка" style="display:none">
+    <div class="две-колонки">
+      <!-- ЛЕВАЯ: НАПИСАТЬ -->
+      <div class="колонка">
+        <h2>Сообщение</h2>
+        <div class="карточка">
+          <label class="лейбл">Текст сообщения</label>
+          <textarea id="текст-сообщения" class="текстарея" placeholder="Привет! Ваш заказ готов..."></textarea>
+          <div class="кол-символов"><span id="кол-симв">0</span> символов</div>
+
+          <div id="выбранные-номера-инфо" class="инфо-блок">
+            <span id="инфо-кол-во">0</span> получателей выбрано
+          </div>
+
+          <button class="кнопка-главная кнопка-большая" onclick="начатьРассылку()" id="кнопка-отправить">
+            📤 Отправить рассылку
+          </button>
+        </div>
+
+        <!-- ПРОГРЕСС -->
+        <div id="прогресс-блок" class="карточка" style="display:none">
+          <h3>Отправка...</h3>
+          <div class="прогресс-бар"><div id="прогресс-заполнение"></div></div>
+          <p id="прогресс-текст"></p>
+        </div>
+      </div>
+
+      <!-- ПРАВАЯ: ИСТОРИЯ -->
+      <div class="колонка">
+        <h2>История рассылок</h2>
+        <div id="история-список">
+          <p class="загрузка-текст">Загрузка истории...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ВКЛАДКА: НАСТРОЙКИ -->
+  <div id="вкладка-настройки" class="вкладка" style="display:none">
+    <div class="настройки-сетка">
+
+      <!-- NOTION -->
+      <div class="карточка">
+        <h3>📋 Notion подключение</h3>
+        <p class="подсказка">Найдите в Notion: Настройки → Интеграции → Создать интеграцию</p>
+        <label class="лейбл">Notion API Token</label>
+        <input type="password" id="notion-токен" class="поле" placeholder="secret_...">
+        <label class="лейбл">ID базы данных</label>
+        <input type="text" id="notion-база" class="поле" placeholder="32 символа из URL">
+        <p class="подсказка">URL базы: notion.so/.../<b>ВОТ_ЭТО_ID</b>?v=...</p>
+        <button class="кнопка-главная" onclick="сохранитьNotion()">Сохранить</button>
+        <button class="кнопка-вторичная" onclick="проверитьNotion()">Проверить подключение</button>
+        <p id="notion-статус-текст" class="статус-текст"></p>
+      </div>
+
+      <!-- WHATSAPP -->
+      <div class="карточка">
+        <h3>💬 WhatsApp подключение</h3>
+        <p class="подсказка">Подключите WhatsApp Business через QR код</p>
+
+        <div id="wa-статус-блок">
+          <div id="qr-контейнер" style="display:none">
+            <p>Откройте WhatsApp → Связанные устройства → Привязать устройство</p>
+            <img id="qr-код" src="" alt="QR код" class="qr-изображение">
+          </div>
+          <div id="wa-подключён" style="display:none" class="успех-блок">
+            ✅ WhatsApp подключён и готов к работе
+          </div>
+          <div id="wa-не-подключён">
+            <button class="кнопка-зелёная" onclick="подключитьWA()">Подключить WhatsApp</button>
+          </div>
+        </div>
+        <button class="кнопка-опасная" onclick="отключитьWA()" id="кнопка-отключить-wa" style="display:none; margin-top:12px">
+          Отключить
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

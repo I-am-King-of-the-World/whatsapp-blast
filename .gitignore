@@ -1,0 +1,5 @@
+node_modules/
+backend/sessions/
+backend/blast.db
+backend/.env
+.DS_Store

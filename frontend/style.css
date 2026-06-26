@@ -1,0 +1,322 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+/* ===== ЭКРАНЫ ===== */
+.экран { min-height: 100vh; }
+
+/* ===== АВТОРИЗАЦИЯ ===== */
+#экран-авторизации {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f1117 0%, #1a1f2e 100%);
+}
+
+.auth-карточка {
+  background: #1e2333;
+  border: 1px solid #2d3748;
+  border-radius: 16px;
+  padding: 40px;
+  width: 400px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+.лого { text-align: center; margin-bottom: 32px; }
+.лого-иконка { font-size: 40px; }
+.лого h1 { font-size: 22px; font-weight: 700; margin-top: 8px; color: #fff; }
+.лого p { color: #718096; font-size: 14px; margin-top: 4px; }
+
+.auth-табы { display: flex; gap: 4px; background: #0f1117; border-radius: 8px; padding: 4px; margin-bottom: 24px; }
+.таб {
+  flex: 1; padding: 8px; border: none; background: transparent;
+  color: #718096; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+  transition: all 0.2s;
+}
+.таб.активный { background: #25d366; color: #fff; }
+
+/* ===== ПОЛЯ ===== */
+.поле {
+  width: 100%; padding: 12px 14px;
+  background: #0f1117; border: 1px solid #2d3748;
+  border-radius: 8px; color: #e2e8f0; font-size: 14px;
+  margin-bottom: 12px; transition: border-color 0.2s;
+  outline: none;
+}
+.поле:focus { border-color: #25d366; }
+.поле::placeholder { color: #4a5568; }
+
+.текстарея {
+  width: 100%; padding: 12px 14px;
+  background: #0f1117; border: 1px solid #2d3748;
+  border-radius: 8px; color: #e2e8f0; font-size: 14px;
+  min-height: 150px; resize: vertical; outline: none;
+  font-family: inherit; transition: border-color 0.2s;
+}
+.текстарея:focus { border-color: #25d366; }
+
+/* ===== КНОПКИ ===== */
+.кнопка-главная {
+  width: 100%; padding: 12px; background: #25d366;
+  border: none; border-radius: 8px; color: #fff;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; margin-bottom: 8px;
+}
+.кнопка-главная:hover { background: #1fb859; }
+.кнопка-главная:disabled { background: #2d3748; cursor: not-allowed; }
+
+.кнопка-вторичная {
+  padding: 8px 16px; background: #2d3748;
+  border: 1px solid #3d4a5c; border-radius: 8px; color: #e2e8f0;
+  font-size: 14px; cursor: pointer; transition: background 0.2s;
+}
+.кнопка-вторичная:hover { background: #374151; }
+
+.кнопка-зелёная {
+  padding: 10px 20px; background: #25d366;
+  border: none; border-radius: 8px; color: #fff;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s;
+}
+.кнопка-зелёная:hover { background: #1fb859; }
+.кнопка-зелёная:disabled { background: #2d3748; cursor: not-allowed; }
+
+.кнопка-опасная {
+  padding: 10px 20px; background: transparent;
+  border: 1px solid #fc5c65; border-radius: 8px; color: #fc5c65;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.кнопка-опасная:hover { background: #fc5c65; color: #fff; }
+
+.кнопка-выйти {
+  padding: 8px 16px; background: transparent;
+  border: 1px solid #3d4a5c; border-radius: 8px; color: #718096;
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+}
+.кнопка-выйти:hover { border-color: #fc5c65; color: #fc5c65; }
+
+.кнопка-большая { padding: 14px; font-size: 16px; }
+
+/* ===== ШАПКА ===== */
+header {
+  background: #1e2333;
+  border-bottom: 1px solid #2d3748;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+
+.шапка-лево { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+.шапка-лево .лого-иконка { font-size: 24px; }
+.шапка-право { display: flex; align-items: center; gap: 12px; }
+
+nav { display: flex; gap: 4px; }
+.нав-кнопка {
+  padding: 8px 16px; background: transparent;
+  border: none; border-radius: 8px; color: #718096;
+  font-size: 14px; cursor: pointer; font-weight: 500;
+  transition: all 0.2s;
+}
+.нав-кнопка:hover { background: #2d3748; color: #e2e8f0; }
+.нав-кнопка.активный { background: #25d36620; color: #25d366; }
+
+/* ===== БЕЙДЖИ ===== */
+.бейдж {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.бейдж.серый { background: #2d3748; color: #718096; }
+.бейдж.зелёный { background: #25d36620; color: #25d366; }
+.бейдж.жёлтый { background: #f6c90e20; color: #f6c90e; }
+.бейдж.красный { background: #fc5c6520; color: #fc5c65; }
+
+/* ===== ВКЛАДКИ ===== */
+.вкладка { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+/* ===== ПАНЕЛЬ УПРАВЛЕНИЯ ===== */
+.панель-управления {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.панель-лево { display: flex; align-items: center; gap: 12px; }
+.панель-лево h2 { font-size: 20px; font-weight: 700; }
+.панель-право { display: flex; gap: 8px; }
+
+.счётчик {
+  background: #2d3748; color: #a0aec0;
+  padding: 4px 10px; border-radius: 20px; font-size: 13px;
+}
+
+/* ===== ФИЛЬТРЫ ===== */
+.зона-фильтров {
+  background: #1e2333;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 60px;
+  align-items: flex-start;
+}
+
+.фильтр-строка {
+  display: flex; gap: 8px; align-items: center;
+  background: #0f1117; border: 1px solid #2d3748;
+  border-radius: 8px; padding: 8px 12px;
+}
+
+.фильтр-select {
+  background: #1e2333; border: 1px solid #2d3748;
+  color: #e2e8f0; padding: 6px 10px; border-radius: 6px;
+  font-size: 13px; outline: none; cursor: pointer;
+}
+
+.фильтр-input {
+  background: #1e2333; border: 1px solid #2d3748;
+  color: #e2e8f0; padding: 6px 10px; border-radius: 6px;
+  font-size: 13px; outline: none; width: 150px;
+}
+.фильтр-input:focus { border-color: #25d366; }
+
+.кнопка-удалить-фильтр {
+  background: none; border: none; color: #718096;
+  cursor: pointer; font-size: 16px; padding: 0 4px;
+}
+.кнопка-удалить-фильтр:hover { color: #fc5c65; }
+
+/* ===== ПАНЕЛЬ ВЫБОРА ===== */
+.выбор-панель {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 16px;
+  background: #1e2333; border: 1px solid #2d3748;
+  border-radius: 8px; margin-bottom: 12px;
+}
+.чекбокс-лейбл { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.чекбокс-лейбл input { width: 16px; height: 16px; cursor: pointer; accent-color: #25d366; }
+
+/* ===== ТАБЛИЦА ===== */
+.таблица-обёртка {
+  background: #1e2333;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  overflow: auto;
+  max-height: calc(100vh - 320px);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead { position: sticky; top: 0; z-index: 10; }
+
+th {
+  background: #252d3d; padding: 12px 16px;
+  text-align: left; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: #718096; font-weight: 600; white-space: nowrap;
+  cursor: pointer; user-select: none;
+}
+th:hover { color: #e2e8f0; }
+th.сортировка-вверх::after { content: ' ▲'; color: #25d366; }
+th.сортировка-вниз::after { content: ' ▼'; color: #25d366; }
+
+td {
+  padding: 12px 16px; font-size: 14px;
+  border-top: 1px solid #2d3748; white-space: nowrap;
+  max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+}
+
+tr:hover td { background: #252d3d; }
+tr.выбрана td { background: #25d36610; }
+
+td.чекбокс-ячейка { width: 40px; }
+td.чекбокс-ячейка input { width: 16px; height: 16px; cursor: pointer; accent-color: #25d366; }
+
+.загрузка-текст {
+  text-align: center; color: #718096;
+  padding: 40px; font-size: 15px;
+}
+
+/* ===== НАСТРОЙКИ ===== */
+.настройки-сетка {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  max-width: 900px;
+}
+
+.карточка {
+  background: #1e2333; border: 1px solid #2d3748;
+  border-radius: 12px; padding: 24px;
+}
+.карточка h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+.лейбл { display: block; font-size: 13px; color: #a0aec0; margin-bottom: 6px; margin-top: 12px; }
+.подсказка { font-size: 13px; color: #718096; margin-bottom: 12px; line-height: 1.5; }
+
+.статус-текст { margin-top: 12px; font-size: 14px; }
+.статус-текст.успех { color: #25d366; }
+.статус-текст.ошибка-текст { color: #fc5c65; }
+
+.qr-изображение {
+  width: 220px; height: 220px;
+  border-radius: 12px; margin-top: 12px;
+  border: 3px solid #25d366;
+  display: block;
+}
+
+.успех-блок {
+  background: #25d36615; border: 1px solid #25d36640;
+  border-radius: 8px; padding: 16px;
+  color: #25d366; font-weight: 600;
+}
+
+/* ===== РАССЫЛКА ===== */
+.две-колонки { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.колонка h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+
+.кол-символов { text-align: right; font-size: 12px; color: #718096; margin: 4px 0 16px; }
+
+.инфо-блок {
+  background: #25d36615; border: 1px solid #25d36640;
+  border-radius: 8px; padding: 12px 16px;
+  color: #25d366; font-size: 14px; font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.прогресс-бар {
+  background: #2d3748; border-radius: 8px;
+  height: 8px; overflow: hidden; margin: 12px 0;
+}
+.прогресс-бар > div {
+  height: 100%; background: #25d366;
+  border-radius: 8px; transition: width 0.3s;
+  width: 0%;
+}
+
+/* ===== ИСТОРИЯ ===== */
+.история-карточка {
+  background: #0f1117; border: 1px solid #2d3748;
+  border-radius: 10px; padding: 16px; margin-bottom: 10px;
+}
+.история-заголовок { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.история-дата { font-size: 12px; color: #718096; }
+.история-текст { font-size: 14px; color: #a0aec0; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.история-стат { font-size: 13px; }
+
+/* ===== МОБИЛКИ ===== */
+@media (max-width: 768px) {
+  .настройки-сетка { grid-template-columns: 1fr; }
+  .две-колонки { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .шапка-право .бейдж { display: none; }
+}
+
+/* ===== ПРОЧЕЕ ===== */
+.ошибка { color: #fc5c65; font-size: 13px; margin-top: 8px; text-align: center; }

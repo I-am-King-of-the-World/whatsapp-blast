@@ -18,7 +18,11 @@ function создатьКлиент(userId) {
 
   const клиент = new Client({
     authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './sessions' }),
-    puppeteer: { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] }
+    puppeteer: {
+      headless: true,
+      executablePath: process.env.CHROMIUM_PATH || require('child_process').execSync('which chromium || which chromium-browser || which google-chrome || echo ""').toString().trim() || undefined,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process', '--no-zygote']
+    }
   });
 
   клиент.on('qr', async (qr) => {

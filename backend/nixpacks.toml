@@ -1,2 +1,2 @@
 [phases.setup]
-nixPkgs = ["chromium", "nss", "freetype", "harfbuzz", "cacert", "dejavu_fonts"]
+nixPkgs = ["chromium", "nss", "freetype", "harfbuzz", "dejavu_fonts"]

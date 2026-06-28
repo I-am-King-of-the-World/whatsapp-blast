@@ -1,5 +1,5 @@
 // ===== КОНФИГУРАЦИЯ =====
-const API = 'http://localhost:3001/api'; // Замени на URL Railway после деплоя
+const API = 'https://whatsapp-blast-production-cdef.up.railway.app/api';
 
 // ===== СОСТОЯНИЕ =====
 let токен = localStorage.getItem('токен') || null;
@@ -384,7 +384,7 @@ function удалитьФильтр(и) {
 // ===== WHATSAPP =====
 function начатьОпросWA() {
   проверитьСтатусWA();
-  опросWA = setInterval(проверитьСтатусWA, 3000);
+  опросWA = setInterval(проверитьСтатусWA, 8000);
 }
 
 async function проверитьСтатусWA() {

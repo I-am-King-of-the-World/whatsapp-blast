@@ -4,9 +4,23 @@ const { пользователи } = require('../db');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
+// Кеш: userId -> { данные, время }
+const кеш = new Map();
+const КЕШ_TTL = 30000; // 30 секунд
+
+function изКеша(ключ) {
+  const запись = кеш.get(ключ);
+  if (!запись) return null;
+  if (Date.now() - запись.время > КЕШ_TTL) { кеш.delete(ключ); return null; }
+  return запись.данные;
+}
+function вКеш(ключ, данные) { кеш.set(ключ, { данные, время: Date.now() }); }
+
 router.post('/settings', authMiddleware, async (req, res) => {
   const { notion_токен, notion_база } = req.body;
   await пользователи.update({ _id: req.пользователь.id }, { $set: { notion_токен, notion_база } });
+  // Сбросить кеш при смене настроек
+  кеш.delete(`schema_${req.пользователь.id}`);
   res.json({ успех: true });
 });
 
@@ -16,19 +30,27 @@ router.get('/settings', authMiddleware, async (req, res) => {
 });
 
 router.get('/schema', authMiddleware, async (req, res) => {
-  const п = await пользователи.findOne({ _id: req.пользователь.id });
+  const userId = req.пользователь.id;
+  const кешКлюч = `schema_${userId}`;
+  const кешДанные = изКеша(кешКлюч);
+  if (кешДанные) return res.json(кешДанные);
+
+  const п = await пользователи.findOne({ _id: userId });
   if (!п?.notion_токен) return res.status(400).json({ ошибка: 'Notion не настроен' });
 
   try {
     const ответ = await axios.get(`https://api.notion.com/v1/databases/${п.notion_база}`, {
-      headers: { 'Authorization': `Bearer ${п.notion_токен}`, 'Notion-Version': '2022-06-28' }
+      headers: { 'Authorization': `Bearer ${п.notion_токен}`, 'Notion-Version': '2022-06-28' },
+      timeout: 10000
     });
     const свойства = Object.entries(ответ.data.properties).map(([имя, данные]) => ({
       имя,
       тип: данные.type,
       опции: данные.select?.options || данные.multi_select?.options || данные.status?.options || []
     }));
-    res.json({ свойства, название: ответ.data.title?.[0]?.plain_text });
+    const результат = { свойства, название: ответ.data.title?.[0]?.plain_text };
+    вКеш(кешКлюч, результат);
+    res.json(результат);
   } catch (e) {
     res.status(400).json({ ошибка: 'Ошибка подключения к Notion', детали: e.response?.data });
   }
@@ -56,7 +78,7 @@ router.post('/query', authMiddleware, async (req, res) => {
     const ответ = await axios.post(
       `https://api.notion.com/v1/databases/${п.notion_база}/query`,
       тело,
-      { headers: { 'Authorization': `Bearer ${п.notion_токен}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' } }
+      { headers: { 'Authorization': `Bearer ${п.notion_токен}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' }, timeout: 15000 }
     );
     const строки = ответ.data.results.map(стр => {
       const ячейки = {};

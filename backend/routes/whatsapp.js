@@ -83,7 +83,6 @@ function создатьКлиент(userId, сбросить = false) {
   const клиент = new Client({
     authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './sessions' }),
     puppeteer: puppeteerОпции,
-    webVersionCache: { type: 'remote', remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1023460710-alpha.html' }
   });
 
   клиент.on('qr', async (qr) => {

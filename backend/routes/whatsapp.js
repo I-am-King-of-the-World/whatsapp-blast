@@ -159,9 +159,29 @@ router.post('/send', authMiddleware, async (req, res) => {
   let успешно = 0;
   for (const номер of номера) {
     try {
-      const чистый = номер.replace(/\D/g, '');
+      let чистый = номер.replace(/\D/g, '');
       if (чистый.length < 10) continue;
-      await клиент.sendMessage(`${чистый}@c.us`, текст);
+
+      // Казахстан: 8XXXXXXXXXX → 7XXXXXXXXXX
+      if (чистый.length === 11 && чистый.startsWith('8')) {
+        чистый = '7' + чистый.slice(1);
+      }
+      // Без кода страны (10 цифр) → добавить 7 (Казахстан/Россия)
+      if (чистый.length === 10) {
+        чистый = '7' + чистый;
+      }
+
+      const chatId = `${чистый}@c.us`;
+      console.log(`Отправка на ${chatId}`);
+
+      // Проверить что номер есть в WhatsApp
+      const зарегистрирован = await клиент.isRegisteredUser(chatId);
+      if (!зарегистрирован) {
+        console.log(`${chatId} — не в WhatsApp, пропускаем`);
+        continue;
+      }
+
+      await клиент.sendMessage(chatId, текст);
       успешно++;
       await new Promise(r => setTimeout(r, 1500));
     } catch (e) {

@@ -168,9 +168,14 @@
             <button class="кнопка-зелёная" onclick="подключитьWA()">Подключить WhatsApp</button>
           </div>
         </div>
-        <button class="кнопка-опасная" onclick="отключитьWA()" id="кнопка-отключить-wa" style="display:none; margin-top:12px">
-          Отключить
-        </button>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="кнопка-опасная" onclick="отключитьWA()" id="кнопка-отключить-wa" style="display:none">
+            Отключить
+          </button>
+          <button class="кнопка-вторичная" onclick="переподключитьWA()" id="кнопка-переподключить-wa" style="display:none">
+            🔄 Сбросить сессию
+          </button>
+        </div>
       </div>
 
     </div>

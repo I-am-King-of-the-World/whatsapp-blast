@@ -404,6 +404,7 @@ async function проверитьСтатусWA() {
     подключён.style.display = 'block';
     неПодключён.style.display = 'none';
     кнопкаОтключить.style.display = 'block';
+    document.getElementById('кнопка-переподключить-wa').style.display = 'block';
   } else if (статус === 'ожидание_qr' && qr) {
     бейдж.textContent = '● Ожидание QR';
     бейдж.className = 'бейдж жёлтый';
@@ -432,6 +433,12 @@ async function подключитьWA() {
 async function отключитьWA() {
   if (!confirm('Отключить WhatsApp?')) return;
   await запрос('/whatsapp/disconnect', 'POST');
+  проверитьСтатусWA();
+}
+
+async function переподключитьWA() {
+  if (!confirm('Сбросить сессию и подключить заново? Нужно будет заново сканировать QR код.')) return;
+  await запрос('/whatsapp/reconnect', 'POST');
   проверитьСтатусWA();
 }
 

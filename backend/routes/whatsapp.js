@@ -1,44 +1,129 @@
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const { рассылки } = require('../db');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
-const клиенты = new Map();   // userId -> Client
-const статусы = new Map();   // userId -> { статус, qr }
+const клиенты = new Map();
+const статусы = new Map();
 
-function создатьКлиент(userId) {
+function найтиChromium() {
+  // Явный путь из env
+  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
+  // Попробовать через which
+  try {
+    const пути = ['chromium', 'chromium-browser', 'google-chrome', 'google-chrome-stable'];
+    for (const имя of пути) {
+      try {
+        const путь = execSync(`which ${имя} 2>/dev/null`).toString().trim();
+        if (путь) return путь;
+      } catch {}
+    }
+  } catch {}
+  // Nix стандартные пути
+  const nixПути = [
+    '/run/current-system/sw/bin/chromium',
+    '/nix/var/nix/profiles/default/bin/chromium',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
+  ];
+  for (const п of nixПути) {
+    if (fs.existsSync(п)) return п;
+  }
+  return undefined;
+}
+
+const CHROMIUM_PATH = найтиChromium();
+console.log('Chromium путь:', CHROMIUM_PATH || 'не найден, используем встроенный');
+
+function удалитьСессию(userId) {
+  const папка = path.join('./sessions', `session-user_${userId}`);
+  try {
+    if (fs.existsSync(папка)) {
+      fs.rmSync(папка, { recursive: true, force: true });
+      console.log(`Сессия удалена: ${папка}`);
+    }
+  } catch (e) {
+    console.error('Ошибка удаления сессии:', e.message);
+  }
+}
+
+function создатьКлиент(userId, сбросить = false) {
   if (клиенты.has(userId)) {
     try { клиенты.get(userId).destroy(); } catch {}
     клиенты.delete(userId);
   }
 
+  if (сбросить) удалитьСессию(userId);
+
   статусы.set(userId, { статус: 'инициализация', qr: null });
+
+  const puppeteerОпции = {
+    headless: true,
+    timeout: 60000,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process',
+      '--no-zygote',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+    ]
+  };
+  if (CHROMIUM_PATH) puppeteerОпции.executablePath = CHROMIUM_PATH;
 
   const клиент = new Client({
     authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './sessions' }),
-    puppeteer: {
-      headless: true,
-      executablePath: process.env.CHROMIUM_PATH || require('child_process').execSync('which chromium || which chromium-browser || which google-chrome || echo ""').toString().trim() || undefined,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process', '--no-zygote']
-    }
+    puppeteer: puppeteerОпции,
+    webVersionCache: { type: 'remote', remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1023460710-alpha.html' }
   });
 
   клиент.on('qr', async (qr) => {
     статусы.set(userId, { статус: 'ожидание_qr', qr: await qrcode.toDataURL(qr) });
   });
-  клиент.on('ready', () => статусы.set(userId, { статус: 'подключён', qr: null }));
-  клиент.on('disconnected', () => { статусы.set(userId, { статус: 'отключён', qr: null }); клиенты.delete(userId); });
-  клиент.on('auth_failure', () => { статусы.set(userId, { статус: 'ошибка_авторизации', qr: null }); клиенты.delete(userId); });
+  клиент.on('ready', () => {
+    console.log(`WhatsApp готов для ${userId}`);
+    статусы.set(userId, { статус: 'подключён', qr: null });
+  });
+  клиент.on('disconnected', (reason) => {
+    console.log(`WhatsApp отключён (${userId}):`, reason);
+    статусы.set(userId, { статус: 'отключён', qr: null });
+    клиенты.delete(userId);
+  });
+  клиент.on('auth_failure', (msg) => {
+    console.log(`Ошибка авторизации (${userId}):`, msg);
+    статусы.set(userId, { статус: 'ошибка_авторизации', qr: null });
+    клиенты.delete(userId);
+    удалитьСессию(userId);
+  });
 
-  клиент.initialize();
+  клиент.initialize().catch(e => {
+    console.error(`Ошибка инициализации (${userId}):`, e.message);
+    статусы.set(userId, { статус: 'ошибка', qr: null });
+    клиенты.delete(userId);
+  });
+
   клиенты.set(userId, клиент);
 }
 
+// Подключить (обычный)
 router.post('/connect', authMiddleware, (req, res) => {
-  создатьКлиент(req.пользователь.id);
+  создатьКлиент(req.пользователь.id, false);
   res.json({ сообщение: 'Инициализация начата' });
+});
+
+// Переподключить со сбросом сессии
+router.post('/reconnect', authMiddleware, (req, res) => {
+  создатьКлиент(req.пользователь.id, true);
+  res.json({ сообщение: 'Сессия сброшена, инициализация начата' });
 });
 
 router.get('/status', authMiddleware, (req, res) => {
@@ -53,6 +138,7 @@ router.post('/disconnect', authMiddleware, async (req, res) => {
     try { await клиент.destroy(); } catch {}
     клиенты.delete(userId);
   }
+  удалитьСессию(userId);
   статусы.set(userId, { статус: 'отключён', qr: null });
   res.json({ успех: true });
 });

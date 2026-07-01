@@ -172,14 +172,6 @@ router.post('/send', authMiddleware, async (req, res) => {
 
       const chatId = `${чистый}@c.us`;
       console.log(`Отправка на ${chatId}`);
-
-      // Проверить что номер есть в WhatsApp
-      const зарегистрирован = await клиент.isRegisteredUser(chatId);
-      if (!зарегистрирован) {
-        console.log(`${chatId} — не в WhatsApp, пропускаем`);
-        continue;
-      }
-
       await клиент.sendMessage(chatId, текст);
       успешно++;
       await new Promise(r => setTimeout(r, 1500));
